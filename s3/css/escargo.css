@@ -1,0 +1,101 @@
+.patrick-hand-regular {
+    font-family: "Patrick Hand", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.patrick-hand-bold {
+    font-family: "Patrick Hand", cursive;
+    font-weight: 900;
+    font-style: normal;
+}
+
+body {
+    background-color: rgb(211, 211, 211);
+    padding: 0px;
+    margin: 0px;
+}
+
+#main {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#snail {
+    width: 80vw;
+    max-width: 80vh;
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    animation: snailMover 5s ease-in-out 0s infinite alternate;
+    z-index: 2;
+}
+
+#title {
+    margin: 0px;
+    text-align: center;
+    padding-top: 1em;
+    z-index: 3;
+    position: relative;
+}
+
+@keyframes snailMover {
+    0% {
+        padding-bottom: 6vh;
+    }
+
+    50% {
+        padding-bottom: 0vh;
+    }
+
+    100% {
+        padding-bottom: 6vh;
+    }
+}
+
+/* CSS */
+.button-24 {
+    background: #FF4742;
+    border: 1px solid #FF4742;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Patrick Hand", cursive;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 30px;
+    /* min-height: 60px; */
+    outline: 0;
+    padding: 12px 14px;
+    text-align: center;
+    text-rendering: geometricprecision;
+    text-transform: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+}
+
+.button-24:hover,
+.button-24:active {
+    background-color: initial;
+    background-position: 0 0;
+    color: #FF4742;
+}
+
+.button-24:active {
+    opacity: .5;
+}
+
+.button-holder {
+    display: flex;
+    justify-content: center;
+    padding-top: 1em;
+    z-index: 3;
+    position: relative;
+}

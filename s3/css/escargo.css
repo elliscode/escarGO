@@ -47,14 +47,13 @@ body {
     }
 
     50% {
-        padding-bottom: 0vh;
+        padding-bottom: 30px;
     }
 
     100% {
         padding-bottom: 6vh;
     }
 }
-
 /* CSS */
 .button-24 {
     background: #FF4742;
@@ -69,7 +68,6 @@ body {
     font-size: 30px;
     font-weight: 800;
     line-height: 30px;
-    /* min-height: 60px; */
     outline: 0;
     padding: 12px 14px;
     text-align: center;
@@ -80,22 +78,30 @@ body {
     touch-action: manipulation;
     vertical-align: middle;
 }
-
 .button-24:hover,
 .button-24:active {
     background-color: initial;
     background-position: 0 0;
     color: #FF4742;
 }
-
 .button-24:active {
     opacity: .5;
 }
-
 .button-holder {
     display: flex;
     justify-content: center;
     padding-top: 1em;
     z-index: 3;
     position: relative;
+}
+#bottom-text {
+    z-index: 3;
+    position: absolute;
+    bottom:5px;
+    left:0px;
+    width:100%;
+    margin:0px;
+    padding:0px;
+    text-align:center;
+    font-size:20px;
 }

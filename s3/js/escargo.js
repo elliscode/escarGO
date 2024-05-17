@@ -50,7 +50,30 @@ function tellTheSnailYourPosition(position) {
   xmlHttp = new XMLHttpRequest();
   xmlHttp.open("POST", url, true);
   xmlHttp.withCredentials = true;
-  xmlHttp.onload = handleCreateReminder;
-  xmlHttp.onerror = handleCreateReminder;
+  xmlHttp.onload = handleSnailResponse;
   xmlHttp.send(JSON.stringify(payload));
+}
+
+function handleSnailResponse(event) {
+  const result = defaultHandler(event);
+  const distance = result.responseJson.distance;
+  const time = result.responseJson;
+}
+
+function defaultHandler(event) {
+  if (!event || !event.target) {
+    return undefined;
+  }
+  let xmlHttp = event.target;
+  let result = {};
+  try {
+    result = JSON.parse(xmlHttp.responseText);
+  } catch(e) {
+    try {
+      result = {'message': xmlHttp.responseText};
+    } catch (e2) {
+      result = undefined;
+    }
+  }
+  return {statusCode: xmlHttp.status, responseJson: result};
 }

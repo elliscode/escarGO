@@ -47,6 +47,7 @@ body {
 }
 p {
     text-align: center;
+    z-index:3;
 }
 
 @keyframes snailMover {

@@ -187,6 +187,10 @@ function moveSnail() {
   }
   snailLocation.time = Date.now();
 
+  if (shareLocation.style.display != 'none') {
+    return;
+  }
+
   setSnailLocation(snailLocation);
   snail.classList.add('moving');
   displayStatus();
@@ -202,5 +206,4 @@ function getDirectionsToSnail() {
   openLink.click();
 }
 
-displayStatus();
 let snailMoveInterval = setInterval(moveSnail, 1000);

@@ -109,7 +109,7 @@ function showAnErrorToTheUser() {
 }
 
 const timeToKill = document.getElementById('ttk');
-const SNAIL_SPEED_IN_FEET_PER_SECOND = 880; // 0.03281; // ft/s (feet per second)
+const SNAIL_SPEED_IN_FEET_PER_SECOND = 0.03281; // ft/s (feet per second)
 const SNAIL_SPEED_IN_FEET_PER_MINUTE = 60 * SNAIL_SPEED_IN_FEET_PER_SECOND; // ft/min (feet per minute)
 
 function tellTheSnailYourPosition(position) {

@@ -6,7 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>escarGO</title>
-    <link rel="stylesheet" href="css/escargo.css">
+    <link rel="stylesheet" href="css/escargo.css?v=000">
   </head>
   <body>
     <div id="main">
@@ -15,12 +15,13 @@
       <div class="button-holder">
         <button class="button-24" id="share-location" onclick="geolocateUser()">Give him your location</button>
         <button style="display:none;" class="button-24" id="get-directions" onclick="getDirectionsToSnail()">Get directions to your snail</button>
+        <button style="display:none;" class="button-24" id="play-again" onclick="restartTheGame()">Play again</button>
       </div>
       <img id="snail" src="img/snail.png"/>
       <p id="bottom-text"><span class="patrick-hand-bold">Did you know:</span> <span id="fun-fact" class="patrick-hand-regular"></span></p>
     </div>
-    <script type="text/javascript" src="js/env.js"></script>
-    <script type="text/javascript" src="js/fun-facts.js"></script>
-    <script type="text/javascript" src="js/escargo.js"></script>
+    <script type="text/javascript" src="js/env.js?v=000"></script>
+    <script type="text/javascript" src="js/fun-facts.js?v=000"></script>
+    <script type="text/javascript" src="js/escargo.js?v=000"></script>
   </body>
 </html>

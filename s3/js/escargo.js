@@ -232,22 +232,30 @@ function moveSnail() {
     let timeDiff = Date.now() - snailLocation.time;
     let distanceTraveled = Math.min(SNAIL_SPEED_IN_FEET_PER_SECOND * (timeDiff / 1000), snailUserDistance);
     let percentageTraveled = distanceTraveled / snailUserDistance;
-    let latDiff = Math.abs(userLocation.lat - snailLocation.lat);
-    let lonDiff = Math.abs(userLocation.long - snailLocation.long);
-    let latPart = latDiff * percentageTraveled;
-    let lonPart = lonDiff * percentageTraveled;
 
+    // latitude is easy
+    let latDiff = Math.abs(userLocation.lat - snailLocation.lat);
+    let latPart = latDiff * percentageTraveled;
     if (userLocation.lat > snailLocation.lat) {
       snailLocation.lat = snailLocation.lat + latPart;
     } else {
       snailLocation.lat = snailLocation.lat - latPart;
     }
 
-    if (userLocation.long > snailLocation.long) {
-      snailLocation.long = snailLocation.long + lonPart;
-    } else {
-      snailLocation.long = snailLocation.long - lonPart;
+    // longitude is annoying due to the fact that it restarts at -180 and 180
+    let longDiff = Math.abs(userLocation.long - snailLocation.long);
+    let reverser = 1;
+    if (longDiff > 180) {
+      reverser = -1;
+      longDiff = longDiff - 180;
     }
+    let longPart = longDiff * percentageTraveled;
+    if (userLocation.long > snailLocation.long) {
+      snailLocation.long = snailLocation.long + (reverser * longPart);
+    } else {
+      snailLocation.long = snailLocation.long - (reverser * longPart);
+    }
+
     if (snailLocationTimeout) {
       clearTimeout(snailLocationTimeout);
       snailLocationTimeout = undefined;

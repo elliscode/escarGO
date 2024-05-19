@@ -51,6 +51,7 @@ function setUserLocation(lat, long) {
     lat = lat - 180;
   }
   localStorage.setItem("escargo-user-position", JSON.stringify({"lat": lat, "long": long}));
+  fetchedLocation = true;
 }
 
 function getUserLocation() {
@@ -108,17 +109,28 @@ function showAnErrorToTheUser() {
 }
 
 const timeToKill = document.getElementById('ttk');
-const SNAIL_SPEED_IN_FEET_PER_SECOND = 0.03281; // ft/s (feet per second)
+const SNAIL_SPEED_IN_FEET_PER_SECOND = 880; // 0.03281; // ft/s (feet per second)
 const SNAIL_SPEED_IN_FEET_PER_MINUTE = 60 * SNAIL_SPEED_IN_FEET_PER_SECOND; // ft/min (feet per minute)
 
 function tellTheSnailYourPosition(position) {
+  moveSnail();
   const lat = position.coords.latitude;
   const long = position.coords.longitude;
   setUserLocation(lat, long);
   snail.src = 'img/snail-smiling.png';
+  if (userLocationTimeout) {
+    clearTimeout(userLocationTimeout);
+    userLocationTimeout = undefined;
+  }
   userLocationTimeout = setTimeout(geolocateUser, 9000);
+  if (snailLocationTimeout) {
+    clearTimeout(snailLocationTimeout);
+    snailLocationTimeout = undefined;
+  }
   snailLocationTimeout = setTimeout(moveSnail, 1000);
 }
+
+let fetchedLocation = false;
 
 function displayStatus() {
   const userLocation = getUserLocation();
@@ -219,30 +231,28 @@ function moveSnail() {
   if (snailUserDistance > 30) {
     let timeDiff = Date.now() - snailLocation.time;
     let distanceTraveled = Math.min(SNAIL_SPEED_IN_FEET_PER_SECOND * (timeDiff / 1000), snailUserDistance);
-    let latDiff = userLocation.lat - snailLocation.lat;
-    let lonDiff = userLocation.long - snailLocation.long;
-    let denominator = latDiff + lonDiff;
-    if (denominator != 0) {
-      let latNorm = latDiff / denominator;
-      let lonNorm = lonDiff / denominator;
-      let lonComponent = distanceTraveled * lonNorm;
-      let latComponent = distanceTraveled * latNorm;
-      let latPart = (latComponent / EARTH_RADIUS_FEET) * (180 / Math.PI);
-      let lonPart = (lonComponent / EARTH_RADIUS_FEET) * (180 / Math.PI) / Math.cos(snailLocation.lat * Math.PI/180);
+    let percentageTraveled = distanceTraveled / snailUserDistance;
+    let latDiff = Math.abs(userLocation.lat - snailLocation.lat);
+    let lonDiff = Math.abs(userLocation.long - snailLocation.long);
+    let latPart = latDiff * percentageTraveled;
+    let lonPart = lonDiff * percentageTraveled;
 
-      if (userLocation.lat > snailLocation.lat) {
-        snailLocation.lat = snailLocation.lat + latPart;
-      } else {
-        snailLocation.lat = snailLocation.lat - latPart;
-      }
-
-      if (userLocation.long > snailLocation.long) {
-        snailLocation.long = snailLocation.long + lonPart;
-      } else {
-        snailLocation.long = snailLocation.long - lonPart;
-      }
-      snailLocationTimeout = setTimeout(moveSnail, 1000);
+    if (userLocation.lat > snailLocation.lat) {
+      snailLocation.lat = snailLocation.lat + latPart;
+    } else {
+      snailLocation.lat = snailLocation.lat - latPart;
     }
+
+    if (userLocation.long > snailLocation.long) {
+      snailLocation.long = snailLocation.long + lonPart;
+    } else {
+      snailLocation.long = snailLocation.long - lonPart;
+    }
+    if (snailLocationTimeout) {
+      clearTimeout(snailLocationTimeout);
+      snailLocationTimeout = undefined;
+    }
+    snailLocationTimeout = setTimeout(moveSnail, 1000);
   }
   snailLocation.time = Date.now();
   setSnailLocation(snailLocation);
@@ -251,7 +261,9 @@ function moveSnail() {
     return;
   }
   snail.classList.add('moving');
-  displayStatus();
+  if (fetchedLocation) {
+    displayStatus();
+  }
 }
 
 function getDirectionsToSnail() {

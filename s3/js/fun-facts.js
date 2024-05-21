@@ -29,7 +29,7 @@ const funFacts = [
     'the average snail moves at 1cm/s, it takes over 44 hours to go a mile',
     'around 1/3 of snails die after giving birth',
     'snails used to be a staple food during times of famine',
-    'salt will kill a snail, but not this snail, he is immortal',
+    'salt will kill a snail, but not this snail, the snail is immortal',
     'snail eggs are considered a delicacy, and are known as "white caviar"',
     'the teeth of an aquatic snail called the limpet are the strongest known biological material on Earth, even stronger than titanium',
     'snails can feel what\'s on their shell',

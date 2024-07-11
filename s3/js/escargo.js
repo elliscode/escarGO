@@ -4,6 +4,8 @@ const shareLocation = document.getElementById('share-location');
 const playAgain = document.getElementById('play-again');
 
 let locationTimeout = undefined;
+let moveUserTimePeriod = 9000;
+let moveSnailTimePeriod = 1000;
 
 function getSnailLocation(userLocation) {
   let existingSnail = undefined;
@@ -122,17 +124,17 @@ function tellTheSnailYourPosition(position) {
     clearTimeout(userLocationTimeout);
     userLocationTimeout = undefined;
   }
-  userLocationTimeout = setTimeout(geolocateUser, 9000);
+  userLocationTimeout = setTimeout(geolocateUser, moveUserTimePeriod);
   if (snailLocationTimeout) {
     clearTimeout(snailLocationTimeout);
     snailLocationTimeout = undefined;
   }
-  snailLocationTimeout = setTimeout(moveSnail, 1000);
+  snailLocationTimeout = setTimeout(moveSnail, moveSnailTimePeriod);
 }
 
 let fetchedLocation = false;
 
-function displayStatus() {
+function displayStatus(distanceInFeet, timeRemainingInMinutes) {
   const userLocation = getUserLocation();
   if (!userLocation) {
     return;
@@ -141,7 +143,6 @@ function displayStatus() {
   if (!snailLocation) {
     return;
   }
-  const distanceInFeet = Math.max(0, calcCrowFeet(userLocation.lat,userLocation.long,snailLocation.lat,snailLocation.long) - 30);
 
   if (distanceInFeet == 0) {
     snail.src='img/dead.png';
@@ -155,9 +156,8 @@ function displayStatus() {
     shareLocation.style.display = 'none';
   } else {
     title.innerText = `The snail is ${displayDistance(distanceInFeet)} away`;
-    let timeRemaining = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
     timeToKill.parentElement.style.display = 'block';
-    timeToKill.innerText = displayTime(timeRemaining);
+    timeToKill.innerText = displayTime(timeRemainingInMinutes);
     directionsButton.style.display = 'block';
     shareLocation.style.display = 'none';
     playAgain.style.display = 'none';
@@ -169,8 +169,8 @@ function restartTheGame() {
   geolocateUser();
 }
 
-function displayTime(timeInMinutes) {
-  let timeInSeconds = timeInMinutes * 60;
+function displayTime(timeRemainingInMinutes) {
+  let timeInSeconds = timeRemainingInMinutes * 60;
   if (timeInSeconds < 60) {
     return `${Math.round(timeInSeconds * 10) / 10} seconds`;
   } else if (timeInSeconds < 3600) {
@@ -179,6 +179,23 @@ function displayTime(timeInMinutes) {
     return `${Math.round(timeInSeconds / 3600 * 10) / 10} hours`;
   } 
   return `${Math.round(timeInSeconds / 86400 * 10) / 10} days`;
+}
+
+function setTimePeriods(timeInMinutes) {
+  let timeInSeconds = timeInMinutes * 60;
+  if (timeInSeconds < 60) {
+    moveUserTimePeriod = 100;
+    moveSnailTimePeriod = 100;
+  } else if (timeInSeconds < 3600) {
+    moveUserTimePeriod = 100;
+    moveSnailTimePeriod = 100;
+  } else if (timeInSeconds < 86400) {
+    moveUserTimePeriod = 1000;
+    moveSnailTimePeriod = 1000;
+  } else {
+    moveUserTimePeriod = 9000;
+    moveSnailTimePeriod = 1000;
+  }
 }
 
 function displayDistance(distanceInFeet) {
@@ -228,6 +245,9 @@ function moveSnail() {
     return;
   }
   let snailUserDistance = calcCrowFeet(userLocation.lat,userLocation.long,snailLocation.lat,snailLocation.long);
+  const distanceInFeet = Math.max(0, snailUserDistance - 30);
+  const timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
+  setTimePeriods(timeRemainingInMinutes);
   if (snailUserDistance > 30) {
     let timeDiff = Date.now() - snailLocation.time;
     let distanceTraveled = Math.min(SNAIL_SPEED_IN_FEET_PER_SECOND * (timeDiff / 1000), snailUserDistance);
@@ -260,7 +280,7 @@ function moveSnail() {
       clearTimeout(snailLocationTimeout);
       snailLocationTimeout = undefined;
     }
-    snailLocationTimeout = setTimeout(moveSnail, 1000);
+    snailLocationTimeout = setTimeout(moveSnail, moveSnailTimePeriod);
   }
   snailLocation.time = Date.now();
   setSnailLocation(snailLocation);
@@ -270,7 +290,7 @@ function moveSnail() {
   }
   snail.classList.add('moving');
   if (fetchedLocation) {
-    displayStatus();
+    displayStatus(distanceInFeet, timeRemainingInMinutes);
   }
 }
 

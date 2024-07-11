@@ -176,7 +176,7 @@ function displayTime(timeInMinutes) {
   } else if (timeInSeconds < 3600) {
     return `${Math.round(timeInSeconds / 60 * 10) / 10} minutes`;
   } else if (timeInSeconds < 86400) {
-    return `${Math.round(timeInSeconds / 360 * 10) / 10} hours`;
+    return `${Math.round(timeInSeconds / 3600 * 10) / 10} hours`;
   } 
   return `${Math.round(timeInSeconds / 86400 * 10) / 10} days`;
 }

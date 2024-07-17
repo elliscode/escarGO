@@ -245,8 +245,8 @@ function moveSnail() {
     return;
   }
   let snailUserDistance = calcCrowFeet(userLocation.lat,userLocation.long,snailLocation.lat,snailLocation.long);
-  const distanceInFeet = Math.max(0, snailUserDistance - 30);
-  const timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
+  let distanceInFeet = Math.max(0, snailUserDistance - 30);
+  let timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
   setTimePeriods(timeRemainingInMinutes);
   if (snailUserDistance > 30) {
     let timeDiff = Date.now() - snailLocation.time;
@@ -281,6 +281,9 @@ function moveSnail() {
       snailLocationTimeout = undefined;
     }
     snailLocationTimeout = setTimeout(moveSnail, moveSnailTimePeriod);
+
+    distanceInFeet = Math.max(0, snailUserDistance - 30);
+    timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
   }
   snailLocation.time = Date.now();
   setSnailLocation(snailLocation);

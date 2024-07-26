@@ -181,15 +181,14 @@ function displayTime(timeRemainingInMinutes) {
   return `${Math.round(timeInSeconds / 86400 * 10) / 10} days`;
 }
 
-function setTimePeriods(timeInMinutes) {
-  let timeInSeconds = timeInMinutes * 60;
-  if (timeInSeconds < 60) {
+function setTimePeriods(distanceInFeet) {
+  if (distanceInFeet < 5250) {
     moveUserTimePeriod = 100;
     moveSnailTimePeriod = 100;
-  } else if (timeInSeconds < 3600) {
-    moveUserTimePeriod = 100;
-    moveSnailTimePeriod = 100;
-  } else if (timeInSeconds < 86400) {
+  } else if (distanceInFeet < 2 * 5250) {
+    moveUserTimePeriod = 500;
+    moveSnailTimePeriod = 500;
+  } else if (distanceInFeet < 10 * 5250) {
     moveUserTimePeriod = 1000;
     moveSnailTimePeriod = 1000;
   } else {
@@ -247,7 +246,7 @@ function moveSnail() {
   let snailUserDistance = calcCrowFeet(userLocation.lat,userLocation.long,snailLocation.lat,snailLocation.long);
   let distanceInFeet = Math.max(0, snailUserDistance - 30);
   let timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
-  setTimePeriods(timeRemainingInMinutes);
+  setTimePeriods(distanceInFeet);
   if (snailUserDistance > 30) {
     let timeDiff = Date.now() - snailLocation.time;
     let distanceTraveled = Math.min(SNAIL_SPEED_IN_FEET_PER_SECOND * (timeDiff / 1000), snailUserDistance);

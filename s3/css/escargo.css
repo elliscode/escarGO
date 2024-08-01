@@ -87,6 +87,7 @@ p {
     -webkit-user-select: none;
     touch-action: manipulation;
     vertical-align: middle;
+    margin-bottom: 5px;
 }
 .button-24:hover,
 .button-24:active {
@@ -103,6 +104,8 @@ p {
     padding-top: 1em;
     z-index: 3;
     position: relative;
+    align-items: center;
+    flex-direction: column;
 }
 #bottom-text {
     z-index: 3;

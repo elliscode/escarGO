@@ -2,6 +2,7 @@ const title = document.getElementById('title');
 const snail = document.getElementById('snail');
 const shareLocation = document.getElementById('share-location');
 const playAgain = document.getElementById('play-again');
+const getDirectionsToDeath = document.getElementById('get-directions-to-death');
 
 let locationTimeout = undefined;
 let moveUserTimePeriod = 9000;
@@ -95,6 +96,7 @@ let snailLocationTimeout = undefined;
 function geolocateUser() {
   shareLocation.style.display = 'none';
   playAgain.style.display = 'none';
+  getDirectionsToDeath.style.display = 'none';
   if (navigator.geolocation) {
     title.innerText = "Retrieving your location...";
     navigator.geolocation.getCurrentPosition(tellTheSnailYourPosition, showAnErrorToTheUser);
@@ -107,6 +109,7 @@ function showAnErrorToTheUser() {
   title.innerText = `We could not get your location, check your system settings and allow location services, then refresh the page`;
   playAgain.style.display = 'none';
   directionsButton.style.display = 'none';
+  getDirectionsToDeath.style.display = 'none';
   shareLocation.style.display = 'none';
 }
 
@@ -119,12 +122,14 @@ function tellTheSnailYourPosition(position) {
   const lat = position.coords.latitude;
   const long = position.coords.longitude;
   setUserLocation(lat, long);
-  snail.src = 'img/snail-smiling.png';
-  if (userLocationTimeout) {
-    clearTimeout(userLocationTimeout);
-    userLocationTimeout = undefined;
+  if (!localStorage.getItem('where-you-died')) {
+    snail.src = 'img/snail-smiling.png';
+    if (userLocationTimeout) {
+      clearTimeout(userLocationTimeout);
+      userLocationTimeout = undefined;
+    }
+    userLocationTimeout = setTimeout(geolocateUser, moveUserTimePeriod);
   }
-  userLocationTimeout = setTimeout(geolocateUser, moveUserTimePeriod);
   if (snailLocationTimeout) {
     clearTimeout(snailLocationTimeout);
     snailLocationTimeout = undefined;
@@ -144,21 +149,14 @@ function displayStatus(distanceInFeet, timeRemainingInMinutes) {
     return;
   }
 
-  if (distanceInFeet == 0) {
-    snail.src='img/dead.png';
-    snail.classList.remove('moving');
-    title.innerText = `The snail caught you, and you died.`;
-    clearTimeout(snailLocationTimeout);
-    clearTimeout(userLocationTimeout);
-    timeToKill.parentElement.style.display = 'none';
-    playAgain.style.display = 'block';
-    directionsButton.style.display = 'none';
-    shareLocation.style.display = 'none';
+  if (distanceInFeet == 0 || localStorage.getItem('where-you-died')) {
+    displayDead();
   } else {
     title.innerText = `The snail is ${displayDistance(distanceInFeet)} away`;
     timeToKill.parentElement.style.display = 'block';
     timeToKill.innerText = displayTime(timeRemainingInMinutes);
     directionsButton.style.display = 'block';
+    getDirectionsToDeath.style.display = 'none';
     shareLocation.style.display = 'none';
     playAgain.style.display = 'none';
   }
@@ -166,6 +164,7 @@ function displayStatus(distanceInFeet, timeRemainingInMinutes) {
 
 function restartTheGame() {
   localStorage.removeItem("escargo-snail-position");
+  localStorage.removeItem('where-you-died');
   geolocateUser();
 }
 
@@ -305,3 +304,40 @@ function getDirectionsToSnail() {
   openLink.target="_blank";
   openLink.click();
 }
+
+function getDirectionsToYourDeath() {
+  let deathLocation = undefined;
+  try {
+    deathLocation = JSON.parse(localStorage.getItem("where-you-died"));
+  } catch (e) {
+
+  }
+  let coordsString = `${deathLocation.lat},${deathLocation.long}`;
+  let googleUrl = "https://www.google.com/maps/search/?api=1&query=" + coordsString;
+  let openLink = document.createElement('a');
+  openLink.href=googleUrl;
+  openLink.target="_blank";
+  openLink.click();
+}
+
+function checkIfDead() {
+  if (localStorage.getItem('where-you-died')) {
+    displayDead();
+  }
+}
+
+function displayDead() {
+  snail.src='img/dead.png';
+  snail.classList.remove('moving');
+  title.innerText = `The snail caught you, and you died.`;
+  localStorage.setItem('where-you-died', localStorage.getItem("escargo-snail-position"));
+  clearTimeout(snailLocationTimeout);
+  clearTimeout(userLocationTimeout);
+  timeToKill.parentElement.style.display = 'none';
+  playAgain.style.display = 'block';
+  getDirectionsToDeath.style.display = 'block';
+  directionsButton.style.display = 'none';
+  shareLocation.style.display = 'none';
+}
+
+checkIfDead();

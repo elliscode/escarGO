@@ -4,7 +4,7 @@ const shareLocation = document.getElementById('share-location');
 const playAgain = document.getElementById('play-again');
 const getDirectionsToDeath = document.getElementById('get-directions-to-death');
 
-let locationTimeout = undefined;
+let locationWatch = undefined;
 let moveUserTimePeriod = 9000;
 let moveSnailTimePeriod = 1000;
 
@@ -99,7 +99,7 @@ function geolocateUser() {
   getDirectionsToDeath.style.display = 'none';
   if (navigator.geolocation) {
     title.innerText = "Retrieving your location...";
-    navigator.geolocation.getCurrentPosition(tellTheSnailYourPosition, showAnErrorToTheUser);
+    locationWatch = navigator.geolocation.watchPosition(tellTheSnailYourPosition, showAnErrorToTheUser);
   } else {
     json.innerHTML = "Geolocation is not supported by this browser.";
   }
@@ -124,11 +124,6 @@ function tellTheSnailYourPosition(position) {
   setUserLocation(lat, long);
   if (!localStorage.getItem('where-you-died')) {
     snail.src = 'img/snail-smiling.png';
-    if (userLocationTimeout) {
-      clearTimeout(userLocationTimeout);
-      userLocationTimeout = undefined;
-    }
-    userLocationTimeout = setTimeout(geolocateUser, moveUserTimePeriod);
   }
   if (snailLocationTimeout) {
     clearTimeout(snailLocationTimeout);
@@ -333,6 +328,7 @@ function displayDead() {
   localStorage.setItem('where-you-died', localStorage.getItem("escargo-snail-position"));
   clearTimeout(snailLocationTimeout);
   clearTimeout(userLocationTimeout);
+  navigator.geolocation.clearWatch(locationWatch);
   timeToKill.parentElement.style.display = 'none';
   playAgain.style.display = 'block';
   getDirectionsToDeath.style.display = 'block';

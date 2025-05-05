@@ -10,10 +10,7 @@ const DEATH_RADIUS_IN_FEET = 10;
 const timeToKill = document.getElementById('ttk');
 
 // KaiOS does not like the dynamic viewport values
-if (navigator.userAgent.includes('KAIOS/')) {
-  // Array.from(document.querySelectorAll('h1')).forEach(x=>x.style.fontSize='15px');
-  // Array.from(document.querySelectorAll('p, button')).forEach(x=>x.style.fontSize='10px');
-} else {
+if (!navigator.userAgent.includes('KAIOS/')) {
   mapElement.style.height = '100dvh';
   mainElement.style.height = '100dvh';
 }

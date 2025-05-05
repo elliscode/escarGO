@@ -1,11 +1,19 @@
 const title = document.getElementById('title');
 const snail = document.getElementById('snail');
+const mainElement = document.getElementById('main');
+const mapElement = document.getElementById('map');
 const shareLocation = document.getElementById('share-location');
 const playAgain = document.getElementById('play-again');
 const directionsButton = document.getElementById('get-directions');
 const getDirectionsToDeath = document.getElementById('get-directions-to-death');
 const DEATH_RADIUS_IN_FEET = 10;
 const timeToKill = document.getElementById('ttk');
+
+// KaiOS does not like the dynamic viewport values
+if (!navigator.userAgent.includes('KAIOS/')) {
+  mapElement.style.height = '100dvh';
+  mainElement.style.height = '100dvh';
+}
 
 let locationWatch = undefined;
 let snailWatch = undefined;
@@ -142,48 +150,54 @@ function displayStatus(distanceInFeet, timeRemainingInMinutes) {
   }
   
   // Add marker
-  if (!snailMarker) {
-    snailIcon = document.createElement('img');
-    snailIcon.src = 'img/snail.png'; // Path to your icon
-    snailIcon.style.width = '40px'; // Adjust size as needed
-    snailIcon.style.height = '40px';
-    snailIcon.style.transition = 'width 0.2s, height 0.2s';
+  if (map) {
+    if (!snailMarker) {
+      snailIcon = document.createElement('img');
+      snailIcon.src = 'img/snail.png'; // Path to your icon
+      snailIcon.style.width = '40px'; // Adjust size as needed
+      snailIcon.style.height = '40px';
+      snailIcon.style.transition = 'width 0.2s, height 0.2s';
 
-    snailMarker = new maplibregl.Marker({ element: snailIcon, rotationAlignment: 'screen' }).setLngLat([snailLocation.long, snailLocation.lat]).addTo(map);
+      snailMarker = new maplibregl.Marker({ element: snailIcon, rotationAlignment: 'screen' }).setLngLat([snailLocation.long, snailLocation.lat]).addTo(map);
 
-    snailMarker.getElement().classList.add('moving');
+      snailMarker.getElement().classList.add('moving');
 
-    map.on('zoom', () => {
-      resizeMarker(map.getZoom());
-    });
+      map.on('zoom', () => {
+        resizeMarker(map.getZoom());
+      });
+    }
+    snailMarker.setLngLat([snailLocation.long, snailLocation.lat]);
   }
-  snailMarker.setLngLat([snailLocation.long, snailLocation.lat]);
   
   // Add marker
-  if (!playerMarker) {
-    map.setCenter([userLocation.long, userLocation.lat]);
-    snail.style.display = 'none';
-    playerMarker = new maplibregl.Marker({ color: 'blue' }).setLngLat([userLocation.long, userLocation.lat]).addTo(map);
+  if (map) {
+    if (!playerMarker) {
+      map.setCenter([userLocation.long, userLocation.lat]);
+      snail.style.display = 'none';
+      playerMarker = new maplibregl.Marker({ color: 'blue' }).setLngLat([userLocation.long, userLocation.lat]).addTo(map);
 
-    const bounds = new maplibregl.LngLatBounds();
+      const bounds = new maplibregl.LngLatBounds();
 
-    bounds.extend(snailMarker.getLngLat());
-    bounds.extend(playerMarker.getLngLat());
-    
-    map.fitBounds(bounds, {
-      padding: Math.round(window.innerHeight / 5),
-      duration: 3000
-    });
-  }
-  playerMarker.setLngLat([userLocation.long, userLocation.lat]);
-
-  if (playerMarker.getElement().getBoundingClientRect().x < snailMarker.getElement().getBoundingClientRect().x) {
-    if (!snailIcon.src.includes('img/snail-icon-left.png')) {
-      snailIcon.src = 'img/snail-icon-left.png';
+      bounds.extend(snailMarker.getLngLat());
+      bounds.extend(playerMarker.getLngLat());
+      
+      map.fitBounds(bounds, {
+        padding: Math.round(window.innerHeight / 5),
+        duration: 3000
+      });
     }
-  } else {
-    if (!snailIcon.src.includes('img/snail-icon-right.png')) {
-      snailIcon.src = 'img/snail-icon-right.png';
+    playerMarker.setLngLat([userLocation.long, userLocation.lat]);
+  }
+
+  if (map) {
+    if (playerMarker.getElement().getBoundingClientRect().x < snailMarker.getElement().getBoundingClientRect().x) {
+      if (!snailIcon.src.includes('img/snail-icon-left.png')) {
+        snailIcon.src = 'img/snail-icon-left.png';
+      }
+    } else {
+      if (!snailIcon.src.includes('img/snail-icon-right.png')) {
+        snailIcon.src = 'img/snail-icon-right.png';
+      }
     }
   }
 
@@ -199,7 +213,9 @@ function displayStatus(distanceInFeet, timeRemainingInMinutes) {
     if (timeToKill.textContent != newTime) {
       timeToKill.innerText = newTime;
     }
-    // directionsButton.style.display = 'block';
+    if (navigator.userAgent.includes('KAIOS/')) {
+      directionsButton.style.display = 'block';
+    }
     getDirectionsToDeath.style.display = 'none';
     shareLocation.style.display = 'none';
     playAgain.style.display = 'none';
@@ -391,6 +407,10 @@ checkIfDead();
 const mapContainer = 'map';
 let map = undefined;
 window.addEventListener('DOMContentLoaded', () => {
+
+  if (navigator.userAgent.includes('KAIOS/')) {
+    return;
+  }
 
   const maptilerUrl = `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}`;
   

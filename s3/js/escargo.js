@@ -392,7 +392,7 @@ const mapContainer = 'map';
 let map = undefined;
 window.addEventListener('DOMContentLoaded', () => {
 
-  const maptilerUrl = `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}d`;
+  const maptilerUrl = `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}`;
   
   // Define a fallback style (can be minimal)
   const fallbackStyle = {

@@ -22,6 +22,12 @@ body {
     width: 100vw;
     height: 100vh;
     overflow:hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+
 }
 
 #snail {
@@ -31,7 +37,7 @@ body {
     bottom: 50%;
     left: 50%;
     transform: translate(-50%, 50%);
-    z-index: 2;
+    z-index: 1;
 }
 
 .moving {
@@ -40,15 +46,27 @@ body {
 
 #title {
     margin: 0px;
+    margin-top:0.5em;
     text-align: center;
     padding-top: 1em;
     z-index: 3;
     position: relative;
+    pointer-events: none;
+    width: fit-content;
+    background-color: #ffffffcf;
+    padding: 0.5em;
+    border-radius: 0.5em;
 }
 p {
     text-align: center;
     z-index:3;
     position: relative;
+    pointer-events: none;
+    width: fit-content;
+    padding: 0.5em;
+    background-color: #ffffffcf;
+    border-radius: 0.5em;
+    margin-top: 0.5em;
 }
 
 @keyframes snailMover {
@@ -57,7 +75,7 @@ p {
     }
 
     50% {
-        padding-bottom: 6vh;
+        padding-bottom: 5px;
     }
 
     100% {
@@ -106,16 +124,26 @@ p {
     position: relative;
     align-items: center;
     flex-direction: column;
+    pointer-events: none;
+}
+.button-holder button {
+    pointer-events: auto;
 }
 #bottom-text {
+    box-sizing: border-box;
     z-index: 3;
-    position: absolute;
-    bottom:5px;
-    left:0px;
-    width:100%;
-    margin:0px;
-    padding:0px 1em 1em 1em;
+    width: fit-content;
+    margin:0px 1em 1em 1em;
     text-align:center;
     font-size:20px;
     box-sizing:border-box;
+}
+
+#map {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
 }

@@ -1,29 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>escarGO</title>
-    <link rel="stylesheet" href="css/escargo.css?v=002">
-    <meta property="og:title" content="The snail is coming for you..." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://escargo.elliscode.com/" />
-    <meta property="og:image" content="https://escargo.elliscode.com/img/snail.png" />
-    <link rel="icon" type="image/png" href="img/snail.png" />
-  </head>
-  <body>
-    <div id="main">
-      <h1 id="title" class="comic-font-bold">The snail needs your location</h1>
-      <p style="display:none;" class="comic-font-bold">It will take about <span id="ttk"></span> for the snail to reach you</p>
-      <div class="button-holder">
-        <button class="button-24" id="share-location" onclick="geolocateUser()">Give it your location</button>
-        <button style="display:none;" class="button-24" id="get-directions" onclick="getDirectionsToSnail()">Get directions to your snail</button>
-        <button style="display:none;" class="button-24" id="get-directions-to-death" onclick="getDirectionsToYourDeath()">Get directions to your death</button>
-        <button style="display:none;" class="button-24" id="play-again" onclick="restartTheGame()">Play again</button>
-      </div>
-      <img id="snail" src="img/snail.png"/>
-      <p id="bottom-text"><span class="comic-font-bold">Did you know:</span> <span id="fun-fact" class="comic-font-regular"></span></p>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>escarGO</title>
+  <link rel="stylesheet" href="css/escargo.css?v=003">
+  <meta property="og:title" content="The snail is coming for you..." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://escargo.elliscode.com/" />
+  <meta property="og:image" content="https://escargo.elliscode.com/img/snail.png" />
+  <link rel="icon" type="image/png" href="img/snail.png" />
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="main">
+    <h1 id="title" class="comic-font-bold">The snail needs your location</h1>
+    <p style="display:none;" class="comic-font-bold">It will take about <span id="ttk"></span> for the snail to reach
+      you</p>
+    <div class="button-holder">
+      <button class="button-24" id="share-location" onclick="geolocateUser()">Give it your location</button>
+      <button style="display:none;" class="button-24" id="get-directions" onclick="getDirectionsToSnail()">Get
+        directions to your snail</button>
+      <button style="display:none;" class="button-24" id="get-directions-to-death"
+        onclick="getDirectionsToYourDeath()">Get directions to your death</button>
+      <button style="display:none;" class="button-24" id="play-again" onclick="restartTheGame()">Play again</button>
     </div>
-    <script type="text/javascript" src="js/fun-facts.js?v=002"></script>
-    <script type="text/javascript" src="js/escargo.js?v=002"></script>
-  </body>
+    <div style="flex-grow:1;"></div>
+    <p id="bottom-text"><span class="comic-font-bold">Did you know:</span> <span id="fun-fact"
+        class="comic-font-regular"></span></p>
+  </div>
+  <div id="map"></div>
+  <img id="snail" src="img/snail.png" />
+  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+  <script type="text/javascript" src="js/fun-facts.js?v=002"></script>
+  <script type="text/javascript" src="js/env.js?v=003"></script>
+  <script type="text/javascript" src="js/escargo.js?v=002"></script>
+  
+</body>
+
 </html>

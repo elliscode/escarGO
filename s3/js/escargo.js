@@ -2,11 +2,13 @@ const title = document.getElementById('title');
 const snail = document.getElementById('snail');
 const shareLocation = document.getElementById('share-location');
 const playAgain = document.getElementById('play-again');
+const directionsButton = document.getElementById('get-directions');
 const getDirectionsToDeath = document.getElementById('get-directions-to-death');
+const DEATH_RADIUS_IN_FEET = 10;
+const timeToKill = document.getElementById('ttk');
 
 let locationWatch = undefined;
-let moveUserTimePeriod = 9000;
-let moveSnailTimePeriod = 1000;
+let snailWatch = undefined;
 
 function getSnailLocation(userLocation) {
   let existingSnail = undefined;
@@ -99,7 +101,8 @@ function geolocateUser() {
   getDirectionsToDeath.style.display = 'none';
   if (navigator.geolocation) {
     title.innerText = "Retrieving your location...";
-    locationWatch = navigator.geolocation.watchPosition(tellTheSnailYourPosition, showAnErrorToTheUser);
+    locationWatch = navigator.geolocation.watchPosition(storeYourPosition, showAnErrorToTheUser);
+    snailWatch = setInterval(moveSnail, 100);
   } else {
     json.innerHTML = "Geolocation is not supported by this browser.";
   }
@@ -112,27 +115,21 @@ function showAnErrorToTheUser() {
   getDirectionsToDeath.style.display = 'none';
   shareLocation.style.display = 'none';
 }
+let SNAIL_SPEED_IN_FEET_PER_SECOND = 0.03281; // ft/s (feet per second)
+let SNAIL_SPEED_IN_FEET_PER_MINUTE = 60 * SNAIL_SPEED_IN_FEET_PER_SECOND; // ft/min (feet per minute)
 
-const timeToKill = document.getElementById('ttk');
-const SNAIL_SPEED_IN_FEET_PER_SECOND = 0.03281; // ft/s (feet per second)
-const SNAIL_SPEED_IN_FEET_PER_MINUTE = 60 * SNAIL_SPEED_IN_FEET_PER_SECOND; // ft/min (feet per minute)
-
-function tellTheSnailYourPosition(position) {
-  moveSnail();
+function storeYourPosition(position) {
   const lat = position.coords.latitude;
   const long = position.coords.longitude;
   setUserLocation(lat, long);
-  if (!localStorage.getItem('where-you-died')) {
-    snail.src = 'img/snail-smiling.png';
-  }
-  if (snailLocationTimeout) {
-    clearTimeout(snailLocationTimeout);
-    snailLocationTimeout = undefined;
-  }
-  snailLocationTimeout = setTimeout(moveSnail, moveSnailTimePeriod);
 }
 
 let fetchedLocation = false;
+
+let snailMarker = undefined;
+let playerMarker = undefined;
+
+let snailIcon = undefined;
 
 function displayStatus(distanceInFeet, timeRemainingInMinutes) {
   const userLocation = getUserLocation();
@@ -143,17 +140,94 @@ function displayStatus(distanceInFeet, timeRemainingInMinutes) {
   if (!snailLocation) {
     return;
   }
+  
+  // Add marker
+  if (!snailMarker) {
+    snailIcon = document.createElement('img');
+    snailIcon.src = 'img/snail.png'; // Path to your icon
+    snailIcon.style.width = '40px'; // Adjust size as needed
+    snailIcon.style.height = '40px';
+    snailIcon.style.transition = 'width 0.2s, height 0.2s';
+
+    snailMarker = new maplibregl.Marker({ element: snailIcon, rotationAlignment: 'screen' }).setLngLat([snailLocation.long, snailLocation.lat]).addTo(map);
+
+    snailMarker.getElement().classList.add('moving');
+
+    map.on('zoom', () => {
+      resizeMarker(map.getZoom());
+    });
+  }
+  snailMarker.setLngLat([snailLocation.long, snailLocation.lat]);
+  
+  // Add marker
+  if (!playerMarker) {
+    map.setCenter([userLocation.long, userLocation.lat]);
+    snail.style.display = 'none';
+    playerMarker = new maplibregl.Marker({ color: 'blue' }).setLngLat([userLocation.long, userLocation.lat]).addTo(map);
+
+    const bounds = new maplibregl.LngLatBounds();
+
+    bounds.extend(snailMarker.getLngLat());
+    bounds.extend(playerMarker.getLngLat());
+    
+    map.fitBounds(bounds, {
+      padding: Math.round(window.innerHeight / 5),
+      duration: 3000
+    });
+  }
+  playerMarker.setLngLat([userLocation.long, userLocation.lat]);
+
+  if (playerMarker.getElement().getBoundingClientRect().x < snailMarker.getElement().getBoundingClientRect().x) {
+    if (!snailIcon.src.includes('img/snail-icon-left.png')) {
+      snailIcon.src = 'img/snail-icon-left.png';
+    }
+  } else {
+    if (!snailIcon.src.includes('img/snail-icon-right.png')) {
+      snailIcon.src = 'img/snail-icon-right.png';
+    }
+  }
 
   if (distanceInFeet == 0 || localStorage.getItem('where-you-died')) {
     displayDead();
   } else {
-    title.innerText = `The snail is ${displayDistance(distanceInFeet)} away`;
+    let titleText = `The snail is ${displayDistance(distanceInFeet)} away`;
+    if (title.textContent != titleText) {
+      title.innerText = titleText;
+    }
     timeToKill.parentElement.style.display = 'block';
-    timeToKill.innerText = displayTime(timeRemainingInMinutes);
-    directionsButton.style.display = 'block';
+    let newTime = displayTime(timeRemainingInMinutes);
+    if (timeToKill.textContent != newTime) {
+      timeToKill.innerText = newTime;
+    }
+    // directionsButton.style.display = 'block';
     getDirectionsToDeath.style.display = 'none';
     shareLocation.style.display = 'none';
     playAgain.style.display = 'none';
+  }
+}
+
+// Function to resize based on zoom
+function resizeMarker(zoom) {
+  const size = 20 + getZoomSize(zoom);
+  snailIcon.style.width = `${size}px`;
+  snailIcon.style.height = `${size}px`;
+}
+
+function getZoomSize(zoom) {
+  if (21 < zoom && zoom <= 22) { // 400
+    return Math.round(((zoom - 21) * 200) + 200);
+  } else if (20 < zoom && zoom <= 21) { // 200
+    return Math.round(((zoom - 20) * 100) + 100);
+  } if (19 < zoom && zoom <= 20) { // 100
+    return Math.round(((zoom - 19) * 50) + 50);
+  } else if (18 < zoom && zoom <= 19) { // 50
+    return Math.round(((zoom - 18) * 10) + 40);
+  } else if (17 < zoom && zoom <= 18) { // 50
+    return Math.round(((zoom - 17) * 10) + 30);
+  } else if (16 < zoom && zoom <= 17) { // 50
+    return Math.round(((zoom - 16) * 10) + 20);
+  } else {
+    return 20;
   }
 }
 
@@ -173,22 +247,6 @@ function displayTime(timeRemainingInMinutes) {
     return `${Math.round(timeInSeconds / 3600 * 10) / 10} hours`;
   } 
   return `${Math.round(timeInSeconds / 86400 * 10) / 10} days`;
-}
-
-function setTimePeriods(distanceInFeet) {
-  if (distanceInFeet < 5250) {
-    moveUserTimePeriod = 100;
-    moveSnailTimePeriod = 100;
-  } else if (distanceInFeet < 2 * 5250) {
-    moveUserTimePeriod = 500;
-    moveSnailTimePeriod = 500;
-  } else if (distanceInFeet < 10 * 5250) {
-    moveUserTimePeriod = 1000;
-    moveSnailTimePeriod = 1000;
-  } else {
-    moveUserTimePeriod = 9000;
-    moveSnailTimePeriod = 1000;
-  }
 }
 
 function displayDistance(distanceInFeet) {
@@ -226,8 +284,6 @@ function showRandomSnailFact() {
 let snailFactInterval = setInterval(showRandomSnailFact, 10000);
 showRandomSnailFact();
 
-const directionsButton = document.getElementById('get-directions');
-
 function moveSnail() {
   const userLocation = getUserLocation();
   if (!userLocation) {
@@ -238,10 +294,9 @@ function moveSnail() {
     return;
   }
   let snailUserDistance = calcCrowFeet(userLocation.lat,userLocation.long,snailLocation.lat,snailLocation.long);
-  let distanceInFeet = Math.max(0, snailUserDistance - 30);
+  let distanceInFeet = Math.max(0, snailUserDistance - DEATH_RADIUS_IN_FEET);
   let timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
-  setTimePeriods(distanceInFeet);
-  if (snailUserDistance > 30) {
+  if (snailUserDistance > DEATH_RADIUS_IN_FEET) {
     let timeDiff = Date.now() - snailLocation.time;
     let distanceTraveled = Math.min(SNAIL_SPEED_IN_FEET_PER_SECOND * (timeDiff / 1000), snailUserDistance);
     let percentageTraveled = distanceTraveled / snailUserDistance;
@@ -269,13 +324,7 @@ function moveSnail() {
       snailLocation.long = snailLocation.long - (reverser * longPart);
     }
 
-    if (snailLocationTimeout) {
-      clearTimeout(snailLocationTimeout);
-      snailLocationTimeout = undefined;
-    }
-    snailLocationTimeout = setTimeout(moveSnail, moveSnailTimePeriod);
-
-    distanceInFeet = Math.max(0, snailUserDistance - 30);
+    distanceInFeet = Math.max(0, snailUserDistance - DEATH_RADIUS_IN_FEET);
     timeRemainingInMinutes = distanceInFeet / SNAIL_SPEED_IN_FEET_PER_MINUTE; // minutes
   }
   snailLocation.time = Date.now();
@@ -329,6 +378,7 @@ function displayDead() {
   clearTimeout(snailLocationTimeout);
   clearTimeout(userLocationTimeout);
   navigator.geolocation.clearWatch(locationWatch);
+  clearInterval(snailWatch);
   timeToKill.parentElement.style.display = 'none';
   playAgain.style.display = 'block';
   getDirectionsToDeath.style.display = 'block';
@@ -337,3 +387,16 @@ function displayDead() {
 }
 
 checkIfDead();
+
+let map = undefined;
+window.addEventListener('DOMContentLoaded', () => {
+  // Initialize map using MapLibre
+  map = new maplibregl.Map({
+    container: 'map',
+    style: `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}`,
+    zoom: 16
+  });
+
+  // Add navigation controls
+  map.addControl(new maplibregl.NavigationControl());
+});

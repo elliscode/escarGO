@@ -172,3 +172,5 @@ logfile
 Pipfile.lock
 
 *.test.py
+
+env.js

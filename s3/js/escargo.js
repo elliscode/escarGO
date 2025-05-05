@@ -388,15 +388,58 @@ function displayDead() {
 
 checkIfDead();
 
+const mapContainer = 'map';
 let map = undefined;
 window.addEventListener('DOMContentLoaded', () => {
-  // Initialize map using MapLibre
+
+  const maptilerUrl = `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}d`;
+  
+  // Define a fallback style (can be minimal)
+  const fallbackStyle = {
+    version: 8,
+    sources: {
+      staticImage: {
+        type: "image",
+        url: "img/map.png",
+        coordinates: [
+          [-180, 85.0511],   // top-left
+          [180, 85.0511],    // top-right
+          [180, -85.0511],   // bottom-right
+          [-180, -85.0511]   // bottom-left
+        ]
+      }
+    },
+    layers: [
+      {
+        id: "static-image-layer",
+        type: "raster",
+        source: "staticImage"
+      }
+    ]
+  };
+  
+  fetch(maptilerUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Style fetch failed: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(styleJson => {
+      initializeMap(styleJson);
+    })
+    .catch(error => {
+      console.error('Failed to load MapTiler style, using fallback:', error);
+      initializeMap(fallbackStyle);
+    });
+});
+  
+function initializeMap(style) {
   map = new maplibregl.Map({
-    container: 'map',
-    style: `https://api.maptiler.com/maps/basic/style.json?key=${CLIENT_SIDE_MAPS_API_KEY}`,
+    container: mapContainer,
+    style: style,
     zoom: 16
   });
-
   // Add navigation controls
   map.addControl(new maplibregl.NavigationControl());
-});
+}
